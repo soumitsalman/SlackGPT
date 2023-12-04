@@ -12,29 +12,33 @@ class AssistantClient:
         self.client = openai_client     
         self.asst = openai_asst
         self.thread = self.client.beta.threads.create()
+        self.last_message = None
 
     def add(self, content):
-        message = self.client.beta.threads.messages.create(
+        self.last_message = self.client.beta.threads.messages.create(
             thread_id = self.thread.id,
             role = "user",
             content = _to_str(content)
         )
-        return message
-        # debug.show_json(message)
+        return self.last_message
 
-    def add_and_run(self, content):
-        msg = self.add(content)
+    def run(self):
+        #nothing to run
+        if self.last_message == None:
+            return None
+        
         run = self.client.beta.threads.runs.create(
             assistant_id = self.asst.id,
             thread_id = self.thread.id
         )
+        debug.show_json(run)
         run = self._wait_on_run(run)
         messages = self.client.beta.threads.messages.list(
             thread_id=self.thread.id,
             order = 'asc',
-            after=msg.id)
-        # debug.show_json(messages)
-        return self._collect_response(messages)
+            after=self.last_message.id)
+        debug.show_json(messages)
+        return self._collect_response(messages) 
     
     def _collect_response(self, messages) -> list[str]:
         collected = [[content.text.value for content in m.content] for m in messages if m.role == "assistant"]
@@ -49,7 +53,7 @@ class AssistantClient:
                 run_id = run.id
             )
             # TODO: change the sleep time
-            time.sleep(2)
+            time.sleep(1)
         if run.status == "failed" and run.last_error.code == "rate_limit_exceeded":
             raise Exception("run status failed. daddy needs suga'")
         return run

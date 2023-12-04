@@ -31,4 +31,16 @@ def get_slack_bot_key() -> str:
 def get_slack_app_key() -> str:
     return _config['slack']['poster']['POSTER_APP_TOKEN']
 
+def get_slack_poster_user_id() -> str:
+    return _config['slack']['poster']['POSTER_USER_ID']
+
+def get_redditor_app_id() -> str:
+    return _config['reddit']['REDDITOR_APP_ID']
+
+def get_redditor_app_secret() -> str:
+    return _config['reddit']['REDDITOR_APP_SECRET']
+
+def get_redditor_app_name() -> str:
+    return _config['reddit']['REDDITOR_APP_NAME']
+
 
